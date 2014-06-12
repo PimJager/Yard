@@ -1,0 +1,4 @@
+Plugin/Yard/Kort.hs
+Plugin/Yard/Play/ETAreduce.hs
+Plugin/Yard/Play/ETAreducePass.hs
+Dist/*
