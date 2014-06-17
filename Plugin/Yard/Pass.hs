@@ -11,6 +11,28 @@ import Plugin.Yard.YardStack
 import Plugin.Yard.Grammar
 import qualified Plugin.Yard.StateMachine as State
 
+{- 
+All the code in ExprStack, YardStack and Grammar boils down to the following functions,
+as is described in the paper.
+
+unwind :: CoreExpr -> Stack
+readVar :: Var -> [Grammar] -> Grammar
+
+compile :: Stack -> (Stack, Grammar)
+compile (x:xs) = case x of 
+  Lit l   -> (xs, GLiteral l)
+  Var v   -> case arity $ varType v of a
+    | a > 0  -> let (xs', args) = (\(args, xs') -> (xs', map (compile . unwind) args)) $ splitAt a xs 
+                    in (xs', readVar v args)
+    | a == 0 -> (xs, readVar v [])
+  Lam l e -> (xs, GLambda l $ compile $ unwind e)
+  _       -> (xs, GUnknown x)
+
+ The actual code refelects the iterative learning process we had when building the plugin.
+ It has remained as is, because this understanding this process could be benefitial when
+ building a library to aid EDSL authors with bulding GHC plugins to optimise code using their EDSL
+-}
+
 -- | passes over the binds in the module and prints the grammars and state machines.
 pass :: ModGuts -> CoreM ModGuts
 pass guts = getParsers (mg_binds guts) >>= \parsers -> bindsOnlyPass (mapM $ printParser parsers) guts
